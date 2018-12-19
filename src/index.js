@@ -2,40 +2,27 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-/*
-1. props
-- 속성은 컴포넌트 내부에서는 변경할 수 없는 값(불변 객체이며 Object.isFrozen()함수를 활용하여 true인 것을 확인 할 수 있다)
-- 부모 컴포넌트는 자식의 생성 시점에 속성을 할당함
-- React는 HTML 표준 속성(href, title, style, class..등)에 해당하는지 속성 이름을 비교하고 일치하면 HTML 속성으로 사용하고 아니면 HTML에 렌더링 하지 않았었다.
-  그러나 REACT 16버전 이후 부터 표준이 아닌 HTML 속성도 렌더링하도록 변경되었다.
+/** 1. 데이터를 DOM 요소에 속성으로 저장해서 쓰는 것은 일반적으로 안티패턴으로 여겨진다.
+- DOM을 데이터베이스나 프론트엔드 데이터 저장소로 사용하는 것은 적절하지 않음
+- 또한 DOM에서 데이터를 가져오는 것은 메모리 상의 가상 저장소에서 데이터를 가져오는 것보다 느림
+
+결론 제일 권장하는 방식은 아래와 같다
+, data- attributes are probably a better approach, but in most cases data should be kept in React component state or external stores.
+(https://reactjs.org/blog/2017/09/08/dom-attributes-in-react-16.html)
 **/
 
-
-// class HelloWorld extends React.Component {
-//   render() {
-//     return (
-//       <div>
-//         <h1>{this.props.id}</h1>
-//         <h1>{this.props.password}</h1>
-//       </div>
-//     );
-//   }
-// }
-// export default HelloWorld;
-// ReactDOM.render(React.createElement('div', null, React.createElement(HelloWorld, {id:'test1',password:'1234'}), React.createElement(HelloWorld, {id:'test1',password:'1234'})), document.getElementById('root'));
-
-
-
-// 이 방식이 좀더 가독성이 나은듯
-// props 전체를 data={this.props}와 같이 전달 할 수도 있음
+// 만약 여러 단계의 부모->자식1->자식2->자식3 컴포넌트가 있다고 가정하자
+// 여기서 부모에서 갖고있는 모든 속성을 죄종 자식3한테 전달하려고할때 각 속성을 수동으로 전달해야하는 경우 굉장히 번거롭고 안티패턴이다.
+// 그럴때는 아래와 같이 ...this.props(펼침연산자)를 사용하면 다 전달할 수 있다
 class HelloWorld extends React.Component {
+    /** 펼침 연산자 배열을 바꾸지 않고 새로운 값을 복사, 배열을 합치거나 배열을 펼쳐진 상태로 파라메터로 전달 등의 활용이 가능
+        자세한 내용은 아래 url 참고
+        https://junhobaik.github.io/js-es6-spread-operator/
+        https://wayhome25.github.io/javascript/2017/02/18/js-oop-1/
+    */
   render() {
-    console.log(Object.isFrozen(this.props));
     return (
-      <React.Fragment>
-        <h1 data={this.props}>{this.props.id}</h1>
-        <h1>{this.props.password}</h1>
-      </React.Fragment>
+        <h1 {...this.props}>React is awesome!</h1>
     );
   }
 }
@@ -43,9 +30,8 @@ class HelloWorld extends React.Component {
 export default HelloWorld;
 ReactDOM.render(
   <React.Fragment>
-    <HelloWorld id="test1" password="123"/>
-    <HelloWorld id="test2" password="456"/>
-    <HelloWorld id="test3" password="789"/>
+    <HelloWorld id="test1" password="123" awesome="true"/>
+    <HelloWorld id="test2" password="456" awesome="false"/>
   </React.Fragment>
   ,document.getElementById('root')
 );

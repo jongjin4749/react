@@ -1,32 +1,51 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 
-// 사용할 태그, 속성 객체, 텍스트 값 혹은 새로 생성하는 엘리먼트의 자식 엘리먼트
-// 세 번째 매개변수가 문자열이면 엘리먼트의 텍스트 값이며 아니라면 새로 생성하는 엘리먼트의 자식 엘리먼트
-let reactElement = React.createElement('h1', {name : 'kjj'}, 'Hello world');
-
-// render 함수에는 하나의 React 엘리먼트만 인자로 전달 할 수 있다.
-// ReactDOM.render(reactElement, document.getElementById('root'));
-
-// 만약, 다수의 h1 태그를 넣고 싶다면 div 또는 span을 선택하여 아래와 같이 사용하면 된다.(매개변수 갯수 제한 없음)
-// let reactMultiElement = React.createElement('div', null, reactElement, reactElement);
-// ReactDOM.render(reactMultiElement, document.getElementById('root'));
-
-// 개인적으로, div나 span은 자주 사용되는 태그이고 한번 더 감싸는 복잡도가 있으므로 Fragment를 사용하는게 좋다고 생각한다.
-// let reactMultiElement = React.createElement(React.Fragment, null, reactElement, reactElement);
-// ReactDOM.render(React.createElement(React.Fragment, null, reactMultiElement), document.getElementById('root'));
+/*
+1. props
+- 속성은 컴포넌트 내부에서는 변경할 수 없는 값(불변 객체이며 Object.isFrozen()함수를 활용하여 true인 것을 확인 할 수 있다)
+- 부모 컴포넌트는 자식의 생성 시점에 속성을 할당함
+- React는 HTML 표준 속성(href, title, style, class..등)에 해당하는지 속성 이름을 비교하고 일치하면 HTML 속성으로 사용하고 아니면 HTML에 렌더링 하지 않았었다.
+  그러나 REACT 16버전 이후 부터 표준이 아닌 HTML 속성도 렌더링하도록 변경되었다.
+**/
 
 
-// 만약 Hello World를 컴포넌트화 한다면 아래와 같이 사용하면 좋을 것 같다
-// React 컴포넌트 클래스 이름은 대문자로 시작한다.
+// class HelloWorld extends React.Component {
+//   render() {
+//     return (
+//       <div>
+//         <h1>{this.props.id}</h1>
+//         <h1>{this.props.password}</h1>
+//       </div>
+//     );
+//   }
+// }
+// export default HelloWorld;
+// ReactDOM.render(React.createElement('div', null, React.createElement(HelloWorld, {id:'test1',password:'1234'}), React.createElement(HelloWorld, {id:'test1',password:'1234'})), document.getElementById('root'));
+
+
+
+// 이 방식이 좀더 가독성이 나은듯
+// props 전체를 data={this.props}와 같이 전달 할 수도 있음
 class HelloWorld extends React.Component {
   render() {
+    console.log(Object.isFrozen(this.props));
     return (
-      <h1>Hello World</h1>
+      <React.Fragment>
+        <h1 data={this.props}>{this.props.id}</h1>
+        <h1>{this.props.password}</h1>
+      </React.Fragment>
     );
   }
 }
+
 export default HelloWorld;
-ReactDOM.render(React.createElement(React.Fragment, null, <HelloWorld/>, <HelloWorld/>), document.getElementById('root'));
+ReactDOM.render(
+  <React.Fragment>
+    <HelloWorld id="test1" password="123"/>
+    <HelloWorld id="test2" password="456"/>
+    <HelloWorld id="test3" password="789"/>
+  </React.Fragment>
+  ,document.getElementById('root')
+);

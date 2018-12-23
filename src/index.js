@@ -2,105 +2,53 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-/**
- * 3.3 Babel을 이욯한 jsx 트랜스파일러 설정하기
- *  마지막으로, 브라우저는 JSX를 실행 시킬 수 없다.
- *  브라우저는 오직 자바스크립트만 실행할수 있으므로 jsx를 보통의 자바스크립트로 변환해야한다
- *  그렇게 바꿔주는것이 바로  babel이다
- *
- * 바벨을 사용하는 여러가지 방법이 있는데 가장 인기 좋은건 Webpack 같은 도구에서 Babel을 플러그인으로 사용하는 것
- * Babel의 주용 기능은 ES6+/ES2015+ 컴파일러이지만 JSX를 자바스크립트로 변환하기도함(REACT 팀도 공식적으로 BABEL을 사용하라고 권장함)
- * ES6, ES2015이란? -> 아래링크참고
- * https://luckydavekim.github.io/web/2018/02/07/what-is-the-ecmascript/
- *
- * ie9 같은 구형 브라우저를 지원해야하고 ES6+/ES2015+를 사용하고 싶다면 baebl-preset-es2015 트랜스파일러를 추가해야함
- * 하는걸 권장하지는 않지만 필요하다면 이렇게 해라(의존성이 늘어나고 복잡한 코드가됨)
- *
- *
- */
+class Clock extends React.Component{
+    constructor(props) {
+        // 자식생성자에서 부모 생성자를 호출해야 부모 클래스의 생성자가 실행됨
+        // 호출하지 않으면 부모 클래스(React.component)의 기능을 사용 못함
+        super(props);
+        this.launchClock();
+        this.state = {
+            currentTime : new Date().toLocaleString()
+        }
+    }
+
+    // 만약 contrucotr 메서드를 따로 작성하지 않으면 super()를 호출한 것으로 가정함
+    // state = {
+    //     currentTime : new Date().toLocaleString(),
+    // }
 
 
-/**
- * 3.4. React와 JSX의 까다로운 부분
- * - 태그를 닫을 때 반드시 슬래시를 넣어야함
- * - html 엔터티 코드를 사용할때 정적인 코드는 가능하게 나옴
- * - html 엔터티 코드를 변수에 담아 사용하면 이스케이프 처서 나옴
- * - 그이유는 react/JSX는 위험한 HTML 구문에 대해 자동으로 이스케이프 함(보안)
- */
-class HelloWorld extends React.Component {
-  getUrl() {
-    return 'http://www.afreecatv.com';
-  }
-  render() {
-    let specialChars = '&copy;&mdash;&ldquo;';
-    let specialChars2 = '<script>alert(1);</script>';
-    let styleTest = {
-        backgroundColor : 'red',
-        fontSize : 20
-    };
+    launchClock() {
+        // 자바스크립트에서 this는 함수가 호출된 곳에 따라 다름
+        // this가 컴포넌트 클래스를 참조하여 setState를 사용하기 위해서는 적절한 컨텍스트에 함수를 바인딩해야함
+        // 만약 화살표함수를 아래와 같이 사용하면 자동으로 바인딩된 함수를 생성할 수 있다.
+        setInterval(() => {
+            console.log("Updateing time");
+            // setState함수는 비동기이며 인자에는 아래와 같이 2가지 경우가 있다
+            // 전달하는 상태는 상태 객체의 일부분만 갱신함(일부만 수정하거나 병합하고 완벽하게 교체안함)
+            // https://www.vobour.com/-setstate-%EB%A9%94%EC%8F%98%EB%93%9C-%ED%8C%8C%EB%9D%BC%EB%AF%B8%ED%84%B0%EB%A1%9C-%EA%B0%9D%EC%B2%B4-%EB%8C%80%EC%8B%A0-%ED%95%A8%EC%88%98-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0-using
 
-    return (
-        <React.Fragment>
-            <a href={this.getUrl()}>{this.getUrl()}</a><br/>
-            <span>&copy;&mdash;&ldquo;</span><br/>
-            {/** 아래와 같이 했더니 에러남 readOnly속성을 주든 onchange이벤트 주라고 에러남
-            왜냐 리엑트는 value 속성이 들어가면 onChange이벤트를 넣던지 readOnly 속성을 넣어서 변화를 막으라고함
-            자세한 정보는 https://note.redgoose.me/article/1611/*/}
-            {/**<input value="&copy;&mdash;&ldquo;"/>**/}
-            <input value="&copy;&mdash;&ldquo;" readOnly/><br/>
-            <span key="specialChars">{specialChars}</span><br/>
-            <input value={specialChars} readOnly/><br/>
-            <span>{specialChars2}</span><br/>
+            // 1. Object data
+            // 동적으로 시간이 계속 바뀜
+            this.setState(
+                {currentTime : new Date().toLocaleString()}
+            )
 
-            {/** 이스케이프가 안먹게 사용하고 싶다면 아래와 같이 사용*/}
-            {/**<span>{[<span>&copy;</span>]}</span><br/>*/}
+            // 2. callback function -> 새로운 상태에 의존하는 경우 콜백함수를 사용해야 새로운 상태가 적용된 후에 필요한 작업수행가능
+            // 시간이 이전상태에 계속 머무르는것을 볼 수 있음
+            // this.setState((prevState, props)=>{
+            //     {currentTime : new Date().toLocaleString()}
+            // })
+        }, 1000)
+    }
 
-            {/** jsx의 스타일 속성은 일반적인 HTML과 다르게 동작함, JSX에서는 문자열 대신 자바스크립트 객체를 전달하고
-                CSS 속성은 카멜 표기법으로 작성**/}
-            <span style={styleTest}>하이 스타일테스트</span><br/>
-
-
-            {/** REACT JSX는 CLASS와 FOR를 제외하면 표준 html 속성 모두 사용 가능
-            class와 for는 자바스크립트와 ECMAscript 예약어이고, jsx는 일반 자바스크립트로 변환해서 사용한다.
-            따라서 class와 for대신 classsName과 htmlFor를 사용함
-            */}
-           <span className="jongjin">클래스테스트</span><br/>
-           <input type="radio" name={this.props.name} id={this.props.id} />
-           <label htmlFor={this.props.id}>{this.props.name}</label>
-           <br/>
-
-           {/** bool 값을 속성 값으로 사용하는 경우
-            disabled, required, checked, autofocus, readOnly같은 일부 속성은 폼요소에만 사용
-            중요한점은 속성 값을 {}안에 반드시 자바스크립트 식으로 작성(문자열로 입력하지 않도록해야함)
-            안그러면 에러남
-            추가적으로, 속성 값을 생략하면 React는 생략된 값을 true로 간주함
-
-            자바스크립트와 Node.js는 거짓이 아니라면 참이라고 간주함(거짓인 값은 총 6가지 경우가있음)
-            - false, 0, ""(공백문자열), null, undefined, NaN
-            if (false) { console.log(1) };
-            if (0) { console.log(1) };
-            if ("") { console.log(1) };
-            if (null) { console.log(1) };
-            if (undefined) { console.log(1) };
-            if (NaN) { console.log(1) };
-
-           */}
-          <input disabled={false}/><br/>
-          <input disabled/>
-        </React.Fragment>
-    );
-  }
+    render() {
+        return <div>{this.state.currentTime}</div>
+    }
 }
+export default Clock;
 
-export default HelloWorld;
 ReactDOM.render(
-  <React.Fragment>
-    <HelloWorld id="jongjin4749" name="kim"/>
-  </React.Fragment>
-  ,document.getElementById('root')
-);
-
-
-
-
-
+    <Clock/>, document.getElementById('root')
+)
